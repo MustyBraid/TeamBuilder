@@ -1,7 +1,15 @@
 const inquirer = require("inquirer");
 const fs = require("fs");
+var { Observable } = require("rxjs");
 
-initQuestions = [
+//We need this to be a pseudo 'this' in the inquirer.subscribe block. It's complicated, but removing this line will break everything
+var question;
+
+var numEmployees = 1;
+
+let answerStorage = {};
+
+const initQuestions = [
   {
     type: "input",
     message: "What is the name of your team?",
@@ -9,59 +17,133 @@ initQuestions = [
   },
   {
     type: "input",
-    message:
-      "How many departments are in your team? Answer with a number, please",
-    name: "numDepartments",
+    message: "What is the team manager's name?",
+    name: "managerName",
+  },
+  {
+    type: "input",
+    message: "What is the team manager's employee ID?",
+    name: "managerID",
+  },
+  {
+    type: "input",
+    message: "What is the team manager's email address?",
+    name: "managerEmail",
+  },
+  {
+    type: "input",
+    message: "What is the team manager's office number?",
+    name: "managerOffice",
   },
 ];
 
-class Department {
-  constructor(number) {
-    this.number = number;
-    let questions = [];
-    for (let i = 0; i < number; i++) {
-      const question = [
-        {
-          type: "input",
-          message: `What is the name of department ${i + 1}?`,
-          name: `dep${i + 1}Name`,
-        },
-        {
-          type: "input",
-          message: `How many employees are in department ${i + 1}?`,
-          name: `employees${i + 1}`,
-        },
-      ];
-      questions = questions.concat(question);
-    }
-    this.questions = questions;
+const addonQuestion = [
+  {
+    type: "list",
+    message:
+      'Is there another employee? If so, what is their role? If not hit enter or select "No"',
+    name: `employeeRole`,
+    choices: ["Intern", "Engineer", "No"],
+    default: "No",
+    askAnswered: true,
+  },
+];
+
+const engineerQuestions = [
+  {
+    type: "input",
+    message: "What is this engineers name?",
+    name: `engineerName`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this engineer's employee ID?",
+    name: `engineerID`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this engineer's email address?",
+    name: `engineerEmail`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this engineer's Github username?",
+    name: `engineerGit`,
+    askAnswered: true,
+  },
+];
+
+const internQuestions = [
+  {
+    type: "input",
+    message: "What is this intern's name?",
+    name: `internName`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this intern's employee ID?",
+    name: `internID`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this intern's email address?",
+    name: `internEmail`,
+    askAnswered: true,
+  },
+  {
+    type: "input",
+    message: "What is this intern's school?",
+    name: `internSchool`,
+    askAnswered: true,
+  },
+];
+
+function writeFiles(answerStorage) {
+  fs.writeFile("index.html");
+  fs.writeFile("style.css");
+}
+
+function employeeMaker(employeeRole) {
+  switch (employeeRole) {
+    case "Intern":
+      internQuestions.forEach((element) => question.next(element));
+      question.next(addonQuestion[0]);
+      break;
+    case "Engineer":
+      engineerQuestions.forEach((element) => question.next(element));
+      question.next(addonQuestion[0]);
+      break;
+    case "No":
+      question.complete();
   }
 }
 
-initPrompt = inquirer.prompt(initQuestions).then((answers) => {
-  const departments = new Department(answers.numDepartments);
-  return departments;
+var prompts = new Observable((subscriber) => {
+  question = subscriber;
+  initQuestions.forEach((element) => question.next(element));
+  question.next(addonQuestion[0]);
 });
 
-//const departmentQuestions = inquirer.prompt(initPrompt.departments);
-
-//notes below, code above
-
-// const whatever = new Department(number);
-
-// class Employee {
-//   //this constructor will get the name, job title, and contact information of each employee
-//   constructor(name, title, contact) {
-//     this.name = name;
-//     this.title = title;
-//     this.contact = contact;
-//   }
-// }
-
-//to-do:
-//Make a class constructor for each department's question block. Just to flex
-//num departments > dep1 num people and descriptions > dep 2 num people and descriptions > ...
-// make sure to keep department names clear. throw resulting answer objects into large html block as string literals
-// Add debugger things. Check that certain inputs are integers, others aren't blank, etc.
-// ??????????
-// Profit
+inquirer.prompt(prompts).ui.process.subscribe({
+  next(x) {
+    answerStorage[x.name + numEmployees] = x.answer;
+    if (x.name == `employeeRole`) {
+      numEmployees++;
+      //every 'employeeRole#' key will have its # lag behind by exactly one  because I'm stupid. Luckily this value is easily ignored, but it's important not to be misled
+      employeeMaker(x.answer);
+    }
+  },
+  error(err) {
+    console.log("Something went wrong: " + err);
+  },
+  complete() {
+    console.log("All done, enjoy the organization page!");
+    console.table(answerStorage);
+    //writeFiles(answerStorage);
+  },
+});
