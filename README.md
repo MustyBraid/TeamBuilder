@@ -1,17 +1,7 @@
-GIVEN a command-line application that accepts user input
-WHEN I am prompted for my team members and their information
-THEN an HTML file is generated that displays a nicely formatted team roster based on user input
-WHEN I click on an email address in the HTML
-THEN my default email program opens and populates the TO field of the email with the address
-WHEN I click on the GitHub username
-THEN that GitHub profile opens in a new tab
-WHEN I start the application
-THEN I am prompted to enter the team manager’s name, employee ID, email address, and office number
-WHEN I enter the team manager’s name, employee ID, email address, and office number
-THEN I am presented with a menu with the option to add an engineer or an intern or to finish building my team
-WHEN I select the engineer option
-THEN I am prompted to enter the engineer’s name, ID, email, and GitHub username, and I am taken back to the menu
-WHEN I select the intern option
-THEN I am prompted to enter the intern’s name, ID, email, and school, and I am taken back to the menu
-WHEN I decide to finish building my team
-THEN I exit the application, and the HTML is generated
+Hello! This is a project by Casey Chartier, or Mustybraid if you prefer. My Github is located at https://github.com/MustyBraid and I can be reached by email at chartiercasey@gmail.com.
+
+This project uses the inquirer package to take user input, and the rxjs package to make the whole thing needlessly complicated but more interesting. Eventually a full suite of tests and completed html rendering will be implemented.
+
+I wanted to make this with rxjs to better understand asynchronous programming and evnet handling, as this was a totally new concept to me when starting my bootcamp. rxjs emulates the "observable" object that is apparently native to languages like Java, and it's really interesting! Observables can 'return' multiple values, essentially, rather than being one-and-done like vanilla Javascript onjects. 
+
+A link to me giving a walkthrough of this early version of the project is currently hosted at: https://drive.google.com/file/d/1oeuKny89-4PLx0FUbpJipBK8Z4bszoRx/view
